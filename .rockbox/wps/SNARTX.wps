@@ -1,0 +1,237 @@
+#
+#        .d8888b.  888b    888        d8888 8888888b. 88888888888 Y88b   d88P
+#       d88P  Y88b 8888b   888       d88888 888   Y88b    888      Y88b d88P
+#       Y88b.      88888b  888      d88P888 888    888    888       Y88d88P
+#        "Y888b.   888Y88b 888     d88P 888 888   d88P    888        Y888P
+#           "Y88b. 888 Y88b888    d88P  888 8888888P"     888       d8888b
+#             "888 888  Y88888   d88P   888 888 T88b      888       d888Y88b
+#       Y88b  d88P 888   Y8888  d8888888888 888  T88b     888      d88P  Y88b
+#        "Y8888P"  888    Y888 d88P     888 888   T88b    888     d88P    Y88b
+#
+#               Version 1.0
+#               Tirim4  2025
+#                CC-BY-SA
+
+#__by Cody Mortensen
+#__based on Original Theme: SPAZZ by Chuck Lardo & Spinoffs SNAZZ/SNAZZ2 by Jihoon Kim and SNAZZY by Phil Graves and SNARTY by Simon Andén
+#__some elements & code altered from adwaitapod by even Dook
+#__licence  CC-BY-SA 4.0
+#__target resolution 360x640 (portrait)
+#__tested on HIDIZS AP80 Pro Max (Rockbox)
+#__last updated 06/09/2026
+
+
+#__WPS File
+
+
+#__Header: battery bar removed (it duplicated the percentage under it), volume bar
+#__96px on a 10px gutter, and every element of the status cluster on one optical
+#__centre line - both end blocks 24px thick at y=16. The battery block's font is
+#__22px because an inverted block is drawn at the font height, not the viewport's,
+#__and the wave icon gets %xl y=3 to sit on the digits' centre line.
+#__Divider at y=57: 17px under the cluster, 22px above the art - same value as
+#__SNARTX.sbs, so the two screens read as one theme.
+
+#__Hide The Status Bar
+%wd
+
+#__Preload Fonts
+%Fl(2,12-KodeMono-SemiBold.fnt)
+%Fl(3,15-KodeMono-SemiBold.fnt)
+%Fl(4,22-KodeMono-SemiBold.fnt)
+%Fl(5,29-KodeMono-SemiBold.fnt)
+%Fl(6,72-KodeMono-Bold.fnt)
+
+#__Preload Images
+%xl(H,BatteryStatus.bmp,12)
+%xl(repeat,RepeatStatus.bmp,4)
+%xl(shuffle,ShuffleStatus.bmp,0,0)
+%xl(AlbumArt,AlbumArt.bmp,1,1)
+%xl(P,bb_rbd_123.bmp,0,3,2)
+%xl(PBB,pb_back.bmp,0,0)
+%xl(PB,pb.bmp,0,0)
+%xl(VBB,vb_back.bmp,0,0)
+%xl(VB,vb.bmp,0,0)
+%xl(PBI,Playback_Icons.bmp,5)
+%xl(O,OffOn.bmp,24,0,2)
+%xl(A,album_icon.bmp,0,1,2)
+%xl(MF,MeterFill.bmp,0,0)
+
+#__Album Art Definition (298x298 inside a 300x300 frame)
+%Cl(1,1,298,298,c,c)
+
+#__Show Main Display unless Hold Switch is on
+%?mh<%Vd(LockScreen)|%Vd(MainDisplay)%?bc<%Vd(batCharge)|%Vd(bat)>>
+
+#----------- Main Display ---------#
+
+#__Volume Text
+%Vl(MainDisplay,20,16,74,24,4)
+%ac%pv%Vs(invert)
+
+#__Volume Bar
+%Vl(MainDisplay,104,19,96,18,-)
+%pv(0,0,96,18,VB,backdrop,VBB)
+
+#__Shuffle / Repeat - the whole cluster is one tap target for the quickscreen.
+#__It needs a viewport of its own, because a touch region can be no larger than
+#__the viewport it is declared in - and that viewport has to come BEFORE the two
+#__label blocks below: an empty viewport clears its rectangle on a full redraw,
+#__so one declared after them would wipe the labels. It draws nothing.
+#__59x34 at x 203..261 y 10..43: both label rows plus a margin all round.
+%Vl(MainDisplay,203,10,59,34,-)
+%T(0,0,59,34,quickscreen)
+
+#__Shuffle
+%Vl(MainDisplay,210,15,49,13,2)
+SHF%?ps<%xd(O,2)|%xd(O)>
+
+#__Repeat
+%Vl(MainDisplay,210,30,49,13,2)
+%?mm<RPT%xd(O)|RPT%xd(O,2)|RP1%xd(O,2)|RND%xd(O,2)|A-B%xd(O,2)>
+
+#__Battery Text Percent
+%Vl(bat,-93,16,73,24,4)
+%ac%t(8)%xd(P) %bl%%%Vs(invert);%ac%?if(%bt, =, -1)<%t(0)|%t(8)%bt%Vs(invert)>;%t(8)%ac%xd(P)  %?cf<%cH:%cM%Vs(invert)|%?cl<1|2|3|4|5|6|7|8|9|10|11|12>:%cM%cP%Vs(invert)>
+%Vl(batCharge,-93,16,73,24,4)
+%ac%xd(P,2) %bl%%%Vs(invert);%t(8)%ac%xd(P,2) %bl%%%Vs(invert);%t(8)%ac%xd(P,2)  %?cf<%cH:%cM%Vs(invert)|%?cl<1|2|3|4|5|6|7|8|9|10|11|12>:%cM%cP%Vs(invert)>
+
+#__Top Line
+%Vl(MainDisplay,20,57,320,1,-)
+%dr(0,0,320,1)
+
+#__Album Art
+#__Touch zones - invisible, they draw nothing, so the frame, the placeholder
+#__bitmap and embedded art all stay as they are. The 300x300 frame is split
+#__into equal thirds (~10mm each on the 2.95" panel): left = previous track,
+#__middle = play/pause, right = next track. Taps only, so a drag on the art does
+#__nothing. Screen x: prev 30..129, play 130..229, next 230..329 (all y=80..379).
+%Vl(MainDisplay,30,80,300,300,-)
+%T(0,0,100,300,wps_prev)
+%T(100,0,100,300,play)
+%T(200,0,100,300,wps_next)
+%?C<%Cd|%xd(AlbumArt)>
+#__Frame drawn after the art so a track change cannot paint over it.
+%dr(0,0,300,1)%dr(0,299,300,1)%dr(0,1,1,298)%dr(299,1,1,298)
+
+#__Track Title
+%Vl(MainDisplay,20,398,320,36,5)
+%al%s%?it<%ia|%fn>
+
+#__Indicators
+%Vl(MainDisplay,20,442,90,19,3)
+%t(8)%xd(Aa);%t(8)%?id<%xd(Ab)|%xd(Aa)>
+
+#__Names
+%Vl(MainDisplay,38,442,302,19,3)
+%al%s%?it<%t(8)%it;%t(8)%id;|%fn>
+
+#__Channels
+%Vl(MainDisplay,20,480,155,28,4)
+%ac%?St(channels)<STEREO|MONO|STEREO|LEFT|RIGHT|KARAOKE>
+
+#__File Info
+%Vl(MainDisplay,185,480,155,28,4)
+%t(5)%ac%?fc<MP1|MP2|MP3|AIFF|WAV|VORBIS|FLAC|MPC|AC3|WAVPAC|ALAC|AAC|SHORTEN|SID|ADX|NSF|SPEEX|SPC|APE|WMA|WMAPRO|MOD|SAP|COOK|AAC|AC3|ATRAC3|CMC|CM3|CMR|CMS|DMC|DLT|MPT|MPD|RMT|TMC|TM8|TM2|ATRAC3|SMAF|AU|VOX|WAVE64|TRUEAUD|WMAVOX|MUSEPAK|AAC-HE|AY|VTX|GBS|HES|SGC|VGM|KSS|OPUS|AAC|UNKNOWN?>%Vs(invert);%t(5)%ac%?fv<~>%fbk%Vs(invert);%t(5)%ac%fkkHz%Vs(invert)
+
+#__Peak Meter Bars (image bars, 20px tall, stacked L over R like the original pm)
+%Vl(MainDisplay,20,518,320,20,-)
+%pL(0,0,320,20,MF)
+%Vl(MainDisplay,20,542,320,20,-)
+%pR(0,0,320,20,MF)
+
+#__Track Progress Bar
+#__Seek target - invisible, never drawn: tap to jump, drag to scrub.
+#__Width and x match the bar exactly, so a tap seeks to the position it points
+#__at; the 40px band (screen x=20..339, y=570..609) only makes it easy to hit
+#__instead of the bare 8px strip. Kept ahead of the bar so it draws over nothing.
+#__It lives in MainDisplay, so it disappears with the hold/lock screen.
+%Vl(MainDisplay,20,570,320,40,-)
+%T(0,0,320,40,progressbar)
+%Vl(MainDisplay,20,588,320,1,-)
+%dr(0,0,320,1)
+%Vl(MainDisplay,20,589,320,8,-)
+%pb(0,0,320,8,PBB,slider,PB,notouch)
+%Vl(MainDisplay,20,597,320,1,-)
+%dr(0,0,320,1)
+
+#__Play/Pause Icons
+%V(20,612,21,13,-)
+%?mp<%xd(PBI,1)|%xd(PBI,2)|%xd(PBI,3)|%xd(PBI,4)|%xd(PBI,5)>
+
+#__Next Up Selector
+%?pE(20)<%?pS(10)<%Vd(curInfo)|%Vd(nextInfo)>|%Vd(curInfo)>
+
+#__Elapsed / total time  |  playlist position / track count  |  peak meters.
+#__The time sits beside the play indicator, the count keeps the middle slot the
+#__original theme put it in, and the right slot is the original block, restored.
+#__The line was lifted 1px (610 -> 609) so its digits sit on the same rows as the
+#__play indicator: both now ink rows 613..621. Tracks of an hour or longer drop
+#__the spaces in the time so the pair still fits.
+%Vl(curInfo,43,609,297,20,3)
+%al%?if(%pt, >=, 3600)<%pc/%pt|%pc / %pt>%ac%pp/%pe%ar%?if(%pe, >, 999)<%pR|%pL-%pR>
+
+#__Next Up
+%Vl(nextInfo,42,610,22,20,3)
+%ac→%Vs(invert)
+%Vl(nextInfo,64,610,276,20,3)
+%ac%s%?Ia<%Ia%?It< - %It>|%Fn> %Vs(invert)
+
+#-------- Lock Screen Layer -------#
+
+#__Username - Max 8 characters anything more will scroll
+%Vl(LockScreen,20,8,64,17,3)
+%al%sROCKBOX
+
+#__Hold
+%Vl(LockScreen,90,8,81,17,3)
+%?mh<%acLOCKED%Vs(invert)|>
+
+#__Repeat
+%Vl(LockScreen,260,11,21,12,-)
+%?and(%if(%ps, =, 1),%or(%if(%mm, =, 1),%if(%mm, >, 1)),%or(%if(%fc, !=, 4),%if(%fc, !=, 5),%if(%fc, !=, 7),%if(%fc, !=, 11),%if(%fc, !=, 13)))<%xd(shuffle,%ps)>
+%?and(%if(%ps, =, 1),%or(%if(%mm, =, 1),%if(%mm, >, 1)),%or(%if(%fc, =, 4),%if(%fc, =, 5),%if(%fc, =, 7),%if(%fc, =, 11),%if(%fc, =, 13)))<%xd(shuffle,%ps)>
+%?and(%if(%ps, !=, 1),%if(%mm, >, 1),%or(%if(%fc, !=, 4),%if(%fc, !=, 5),%if(%fc, !=, 7),%if(%fc, !=, 11),%if(%fc, !=, 13)))<%xd(repeat,%mm,-1)>
+
+#__Shuffle
+%Vl(LockScreen,232,11,21,11,-)
+%?and(%if(%ps, =, 1),%if(%mm, >, 1),%or(%if(%fc, =, 4),%if(%fc, =, 5),%if(%fc, =, 7),%if(%fc, =, 11),%if(%fc, =, 13)))<%xd(repeat,%mm)>
+%?and(%if(%ps, =, 1),%if(%mm, >, 1),%or(%if(%fc, !=, 4),%if(%fc, !=, 5),%if(%fc, !=, 7),%if(%fc, !=, 11),%if(%fc, !=, 13)))<%xd(repeat,%mm,-1)>
+
+#__Battery Text
+%Vl(LockScreen,-55,8,35,17,3)
+%ar%bl%%
+
+#__Battery Icon
+%Vl(LockScreen,-72,11,21,11,-)
+%?bp<%xd(Hl)|%?bl<%xd(Ha)|%xd(Hb)|%xd(Hc)|%xd(Hd)|%xd(He)|%xd(Hf)|%xd(Hg)|%xd(Hh)|%xd(Hi)|%xd(Hj)|%xd(Hk)>>
+
+#__Time
+%Vl(LockScreen,20,95,320,90,6)
+%ac%?cf<%cH:%cM|%?cl<1|2|3|4|5|6|7|8|9|10|11|12>:%cM%cP>
+
+__Date
+%Vl(LockScreen,20,192,320,20,3)
+%ac%?cu<Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday>, %cb %cd
+
+#__Top Line
+%Vl(LockScreen,20,240,320,1,-)
+%dr(0,0,320,1)
+
+#__Album Art
+%Vl(LockScreen,30,262,300,300,-)
+%?C<%Cd|%xd(AlbumArt)>
+#__Frame drawn after the art so a track change cannot paint over it.
+%dr(0,0,300,1)%dr(0,299,300,1)%dr(0,1,1,298)%dr(299,1,1,298)
+
+#__Track Title
+%Vl(LockScreen,20,576,320,36,5)
+%al%s%?it<%ia|%fn>
+
+#__Track Progress Bar
+%Vl(LockScreen,20,622,320,1,-)
+%dr(0,0,320,1)
+%Vl(LockScreen,20,623,320,8,-)
+%pb(0,0,320,8,PBB,slider,PB)
+%Vl(LockScreen,20,631,320,1,-)
+%dr(0,0,320,1)
